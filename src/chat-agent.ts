@@ -34,7 +34,7 @@ const intentSchema = z.object({
     "unknown",          // fallback — reply with suggestions
   ]),
   params: z.record(z.unknown()).optional(),
-  reasoning: z.string().min(1),
+  reasoning: z.string().optional(),
 });
 
 type IntentName = "hunt_prospects" | "draft_content" | "get_digest" | "list_pending" | "send_touch" | "unknown";
