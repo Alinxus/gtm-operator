@@ -16,8 +16,11 @@ import type {
   WorkspaceDashboard,
 } from "@/lib/types";
 
-export const operatorApiBaseUrl =
-  process.env.NEXT_PUBLIC_OPERATOR_API_BASE_URL?.replace(/\/$/, "") ?? "http://localhost:4000";
+export const operatorApiBaseUrl = (
+  process.env.OPERATOR_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_OPERATOR_API_BASE_URL ??
+  "http://localhost:4000"
+).replace(/\/$/, "");
 
 type JsonBody = Record<string, unknown> | Array<unknown>;
 
