@@ -1,0 +1,30 @@
+{
+  "name": "@retaindb/marketing-orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:worker": "npx wrangler dev",
+    "build": "tsup src/index.ts --format esm --dts",
+    "build:worker": "npx wrangler deploy --dry-run",
+    "start": "node dist/index.js",
+    "deploy:worker": "npx wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "seed": "tsx src/index.ts --seed-only"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.0",
+    "hono": "^4.7.0",
+    "postgres": "^3.4.8",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.2.4"
+  }
+}

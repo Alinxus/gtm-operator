@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+.wrangler/
+*.log
+.vercel/
+frontend/.next/
+frontend/node_modules/
+frontend/.vercel/
+frontend/.env.local

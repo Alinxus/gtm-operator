@@ -1,0 +1,44 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "retaindb-gtm-operator",
+  "account_id": "d8eed40d339cb27379c297cf76b13e17",
+  "main": "src/worker.ts",
+  "workers_dev": true,
+  "preview_urls": true,
+  "compatibility_date": "2026-03-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "PORT": "8788",
+    "DEFAULT_BRAND_SLUG": "retaindb",
+    "DEFAULT_MEMORY_PROVIDER": "retaindb-http",
+    "DEFAULT_LLM_PROVIDER": "openai",
+    "OPENAI_BASE_URL": "https://api.openai.com/v1",
+    "OPENAI_MODEL": "gpt-4.1-mini",
+    "RETAINDB_API_BASE_URL": "https://api.retaindb.com",
+    "RETAINDB_PROJECT": "probe2-1772670812962",
+    "CORS_ALLOWED_ORIGINS": "*",
+    "CLOUDFLARE_ACCOUNT_ID": "d8eed40d339cb27379c297cf76b13e17",
+    "RESEARCH_HTTP_USER_AGENT": "RetainDB-GTM-Operator/0.2 (+https://retaindb.com)",
+    "SEED_ON_BOOT": "true",
+    "ALLOW_IN_MEMORY_STORE": "false",
+    "ALLOW_MOCK_MEMORY_PROVIDER": "false"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["0 */6 * * *"]
+  }
+  // Add a Hyperdrive binding so Workers can talk to Neon/Postgres without exposing raw DB sockets:
+  // "hyperdrive": [
+  //   {
+  //     "binding": "HYPERDRIVE",
+  //     "id": "replace-with-your-hyperdrive-id"
+  //   }
+  // ],
+  // Optional for future public-page rendering on X/LinkedIn without paid APIs:
+  // "browser": {
+  //   "binding": "BROWSER",
+  //   "remote": true
+  // }
+}
