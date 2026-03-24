@@ -912,12 +912,24 @@ export class YCombinatorResearchConnector {
     },
   ) {}
 
-  async sync(input: { query: string; maxResults?: number }) {
+  async sync(input: { query: string; batch?: string; maxResults?: number }) {
     const maxResults = Math.max(1, Math.min(20, input.maxResults ?? 8));
-    const directoryHtml = await fetchText(`https://www.ycombinator.com/companies?query=${encodeURIComponent(input.query)}`, {
+    // Extract YC batch token (e.g. W25, S24) from query string if not provided explicitly
+    let query = input.query;
+    let batch = input.batch;
+    if (!batch) {
+      const batchMatch = query.match(/\b([WSFwsf]\d{2})\b/);
+      if (batchMatch) {
+        batch = batchMatch[1].toUpperCase();
+        query = query.replace(batchMatch[0], "").replace(/\s+/g, " ").trim();
+      }
+    }
+    const directoryHtml = await fetchText(`https://www.ycombinator.com/companies?query=${encodeURIComponent(query)}`, {
       "User-Agent": this.options.userAgent,
     });
     const algolia = extractYcAlgoliaOptions(directoryHtml);
+    const algoliaParams: Record<string, string> = { query, hitsPerPage: String(maxResults) };
+    if (batch) algoliaParams.facetFilters = JSON.stringify([`batch:${batch}`]);
     const response = await fetch(`https://${algolia.app}-dsn.algolia.net/1/indexes/*/queries`, {
       method: "POST",
       headers: {
@@ -930,10 +942,7 @@ export class YCombinatorResearchConnector {
         requests: [
           {
             indexName: "YCCompany_production",
-            params: new URLSearchParams({
-              query: input.query,
-              hitsPerPage: String(maxResults),
-            }).toString(),
+            params: new URLSearchParams(algoliaParams).toString(),
           },
         ],
       }),
