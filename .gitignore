@@ -9,3 +9,5 @@ frontend/.next/
 frontend/node_modules/
 frontend/.vercel/
 frontend/.env.local
+
+.vercel
