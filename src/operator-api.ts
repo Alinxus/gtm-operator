@@ -5,7 +5,7 @@ import type { AppConfig } from "./config.js";
 import type { GrowthOperator } from "./growth-operator.js";
 import { renderWorkspaceApp, renderWorkspaceDirectory } from "./operator-ui.js";
 import { ResearchCoordinator } from "./research-connectors.js";
-import { ChatAgent } from "./chat-agent.js";
+import { AIAgent } from "./agent.js";
 import { DisabledLanguageModelProvider } from "./llm.js";
 
 function jsonError(message: string, status = 400, details?: unknown) {
@@ -954,7 +954,7 @@ export function createOperatorApp(options: {
       if (!brand) return jsonError("Brand not found", 404);
       const claims = await options.store.listClaimsByBrand(brand.id);
       const { runContentDistributionWorker } = await import("./operator-workers.js");
-      const llm = options.operator.getLlmProvider?.() ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never) };
+      const llm = options.operator.getLlmProvider?.() ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never), generateWithTools: async () => { throw new Error("LLM disabled"); } };
       const result = await runContentDistributionWorker({ llm, brand, workspace, claims, topic: body.topic, context: body.context, platform: body.platform });
       if (!result) return jsonError("LLM not configured (set DEFAULT_LLM_PROVIDER=openai)", 503);
       return c.json({ platform: body.platform, draft: result });
@@ -977,7 +977,7 @@ export function createOperatorApp(options: {
       if (!brand) return jsonError("Brand not found", 404);
       const claims = await options.store.listClaimsByBrand(brand.id);
       const { runHnCommentWorker } = await import("./operator-workers.js");
-      const llm = options.operator.getLlmProvider?.() ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never) };
+      const llm = options.operator.getLlmProvider?.() ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never), generateWithTools: async () => { throw new Error("LLM disabled"); } };
       const result = await runHnCommentWorker({ llm, brand, ...body, claims });
       if (!result) return jsonError("LLM not configured (set DEFAULT_LLM_PROVIDER=openai)", 503);
       return c.json({ draft: result, threadUrl: body.threadUrl });
@@ -1103,7 +1103,7 @@ export function createOperatorApp(options: {
       const { workspaceId } = c.req.param();
       const body = await parseBody(c.req.raw, chatMessageSchema);
       const llmProvider = options.operator.getLlmProvider() ?? new DisabledLanguageModelProvider();
-      const agent = new ChatAgent({
+      const agent = new AIAgent({
         llm: llmProvider,
         store: options.store,
         operator: options.operator,

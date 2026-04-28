@@ -67,9 +67,9 @@ export default {
         const { store, memoryProvider } = await createRuntime(config, { ensureSchema: false, seedOnBoot: false });
         const llmProvider = createLanguageModelProvider({
           provider: config.defaultLlmProvider,
-          apiKey: config.openaiApiKey,
+          apiKey: config.defaultLlmProvider === "anthropic" ? config.anthropicApiKey : config.openaiApiKey,
           baseUrl: config.openaiBaseUrl,
-          model: config.openaiModel,
+          model: config.defaultLlmProvider === "anthropic" ? config.anthropicModel : config.openaiModel,
         });
         const operator = new GrowthOperator({
           store,

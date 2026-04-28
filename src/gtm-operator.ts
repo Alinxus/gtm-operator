@@ -399,7 +399,7 @@ export class GtmOperator {
     const freshness = sourceFreshness(input.source);
 
     // Run LLM ICP scorer when available; fall back to keyword scoring
-    const llm = this.options.llmProvider ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never) };
+    const llm = this.options.llmProvider ?? { enabled: false as const, provider: "disabled" as const, generateText: async () => "", generateObject: async () => ({} as never), generateWithTools: async () => { throw new Error("LLM disabled"); } };
     const icpScore = await runIcpScoringWorker({
       llm,
       workspace,
@@ -854,7 +854,7 @@ export class GtmOperator {
     ).map((item) => JSON.parse(item) as { content: string; metadata?: Record<string, unknown> });
     const researchDocuments = asResearchDocuments(signal.metadata.researchDocuments);
     const researchPack = await runOperatorResearchWorker({
-      llm: this.options.llmProvider ?? { enabled: false, provider: "disabled", generateText: async () => "", generateObject: async () => ({} as never) },
+      llm: this.options.llmProvider ?? { enabled: false, provider: "disabled", generateText: async () => "", generateObject: async () => ({} as never), generateWithTools: async () => { throw new Error("LLM disabled"); } },
       brand,
       workspace,
       account,
@@ -965,7 +965,7 @@ export class GtmOperator {
     });
 
     const generatedSequence = await runOperatorSequenceWorker({
-      llm: this.options.llmProvider ?? { enabled: false, provider: "disabled", generateText: async () => "", generateObject: async () => ({ steps: [] } as never) },
+      llm: this.options.llmProvider ?? { enabled: false, provider: "disabled", generateText: async () => "", generateObject: async () => ({ steps: [] } as never), generateWithTools: async () => { throw new Error("LLM disabled"); } },
       brand,
       workspace,
       account,

@@ -35,6 +35,8 @@ describe("operator api", () => {
         openaiBaseUrl: "https://api.openai.com/v1",
         openaiApiKey: undefined,
         openaiModel: "gpt-4.1-mini",
+        anthropicApiKey: undefined,
+        anthropicModel: "claude-sonnet-4-6",
         githubToken: undefined,
         githubAppId: undefined,
         githubAppPrivateKey: undefined,

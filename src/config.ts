@@ -10,10 +10,12 @@ const EnvSchema = z.object({
   RETAINDB_PROJECT: z.string().trim().min(1).default("retaindb-marketing"),
   DEFAULT_BRAND_SLUG: z.string().trim().min(1).default("retaindb"),
   DEFAULT_MEMORY_PROVIDER: z.enum(["retaindb-http", "mock"]).default("retaindb-http"),
-  DEFAULT_LLM_PROVIDER: z.enum(["disabled", "openai"]).default("disabled"),
+  DEFAULT_LLM_PROVIDER: z.enum(["disabled", "openai", "anthropic"]).default("disabled"),
   OPENAI_BASE_URL: z.string().trim().min(1).default("https://api.openai.com/v1"),
   OPENAI_API_KEY: z.string().trim().optional(),
   OPENAI_MODEL: z.string().trim().min(1).default("gpt-4.1-mini"),
+  ANTHROPIC_API_KEY: z.string().trim().optional(),
+  ANTHROPIC_MODEL: z.string().trim().min(1).default("claude-sonnet-4-6"),
   GITHUB_TOKEN: z.string().trim().optional(),
   GITHUB_APP_ID: z.string().trim().optional(),
   GITHUB_APP_PRIVATE_KEY: z.string().trim().optional(),
@@ -67,10 +69,12 @@ export interface AppConfig {
   retainedbProject: string;
   defaultBrandSlug: string;
   defaultMemoryProvider: "retaindb-http" | "mock";
-  defaultLlmProvider: "disabled" | "openai";
+  defaultLlmProvider: "disabled" | "openai" | "anthropic";
   openaiBaseUrl: string;
   openaiApiKey?: string;
   openaiModel: string;
+  anthropicApiKey?: string;
+  anthropicModel: string;
   githubToken?: string;
   githubAppId?: string;
   githubAppPrivateKey?: string;
@@ -127,6 +131,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const databaseUrl = parsed.DATABASE_URL?.trim();
   const retainedbApiKey = parsed.RETAINDB_API_KEY?.trim();
   const openaiApiKey = parsed.OPENAI_API_KEY?.trim();
+  const anthropicApiKey = parsed.ANTHROPIC_API_KEY?.trim();
   const githubToken = parsed.GITHUB_TOKEN?.trim();
   const githubAppId = parsed.GITHUB_APP_ID?.trim();
   const githubAppPrivateKey = normalizeMultilineSecret(parsed.GITHUB_APP_PRIVATE_KEY);
@@ -164,6 +169,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error("OPENAI_API_KEY is required when DEFAULT_LLM_PROVIDER=openai.");
   }
 
+  if (parsed.DEFAULT_LLM_PROVIDER === "anthropic" && !anthropicApiKey) {
+    throw new Error("ANTHROPIC_API_KEY is required when DEFAULT_LLM_PROVIDER=anthropic.");
+  }
+
   const hunterApiKey = parsed.HUNTER_API_KEY?.trim();
   const resendApiKey = parsed.RESEND_API_KEY?.trim();
   const resendFromAddress = parsed.RESEND_FROM_ADDRESS?.trim();
@@ -190,6 +199,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     openaiBaseUrl: parsed.OPENAI_BASE_URL,
     openaiApiKey,
     openaiModel: parsed.OPENAI_MODEL,
+    anthropicApiKey,
+    anthropicModel: parsed.ANTHROPIC_MODEL,
     githubToken,
     githubAppId,
     githubAppPrivateKey,

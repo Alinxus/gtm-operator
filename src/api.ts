@@ -123,9 +123,13 @@ export function createApp(options: {
   });
   const llmProvider = createLanguageModelProvider({
     provider: options.config.defaultLlmProvider,
-    apiKey: options.config.openaiApiKey,
+    apiKey: options.config.defaultLlmProvider === "anthropic"
+      ? options.config.anthropicApiKey
+      : options.config.openaiApiKey,
     baseUrl: options.config.openaiBaseUrl,
-    model: options.config.openaiModel,
+    model: options.config.defaultLlmProvider === "anthropic"
+      ? options.config.anthropicModel
+      : options.config.openaiModel,
   });
   const operator = new GrowthOperator({
     store: options.store,
