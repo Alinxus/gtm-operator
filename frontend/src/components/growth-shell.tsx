@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -9,11 +10,13 @@ import {
   CalendarDays,
   Mail,
   Megaphone,
+  Menu,
   MessageSquare,
   Rocket,
   Search,
   Send,
   UsersRound,
+  X,
 } from "lucide-react";
 import type { Workspace, WorkspaceDashboard } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
@@ -49,49 +52,89 @@ interface GrowthShellProps {
 export function GrowthShell({ workspaces, workspace, dashboard, children }: GrowthShellProps) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const sidebarContent = (
+    <>
+      <div className="dashboard-sidebar-logo">
+        <Link href="/workspaces" onClick={() => setOpen(false)}>
+          <span className="dashboard-logo-text">
+            retain<b>db</b>
+          </span>
+        </Link>
+        {/* Close button — mobile only */}
+        <button
+          className="sidebar-close-btn"
+          onClick={() => setOpen(false)}
+          aria-label="Close menu"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <nav className="dashboard-sidebar-nav">
+        <p className="dashboard-section-label">Growth Operator</p>
+        {navigation.map((item) => {
+          const Icon = item.icon;
+          const active = isActivePath(pathname, workspace.id, item.href);
+          return (
+            <Link
+              key={item.href}
+              href={`/workspaces/${workspace.id}/${item.href}`}
+              className={`dashboard-nav-item ${active ? "is-active" : ""}`}
+              onClick={() => setOpen(false)}
+            >
+              <Icon className="h-4 w-4" />
+              {item.name}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="dashboard-sidebar-footer">
+        <div className="dashboard-user-row">
+          <div className="dashboard-user-avatar">{workspace.name.slice(0, 1).toUpperCase()}</div>
+          <div className="flex-1 min-w-0">
+            <p className="dashboard-user-name truncate">{workspace.name}</p>
+            <p className="dashboard-user-email truncate">{workspace.primaryIcp}</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div className="dashboard-shell">
+      {/* Backdrop — mobile only */}
+      {open && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Permanent sidebar (desktop) */}
       <aside className="dashboard-sidebar">
-        <div className="dashboard-sidebar-logo">
-          <Link href="/workspaces">
-            <span className="dashboard-logo-text">
-              retain<b>db</b>
-            </span>
-          </Link>
-        </div>
+        {sidebarContent}
+      </aside>
 
-        <nav className="dashboard-sidebar-nav">
-          <p className="dashboard-section-label">Growth Operator</p>
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const active = isActivePath(pathname, workspace.id, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={`/workspaces/${workspace.id}/${item.href}`}
-                className={`dashboard-nav-item ${active ? "is-active" : ""}`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="dashboard-sidebar-footer">
-          <div className="dashboard-user-row">
-            <div className="dashboard-user-avatar">{workspace.name.slice(0, 1).toUpperCase()}</div>
-            <div className="flex-1 min-w-0">
-              <p className="dashboard-user-name truncate">{workspace.name}</p>
-              <p className="dashboard-user-email truncate">{workspace.primaryIcp}</p>
-            </div>
-          </div>
-        </div>
+      {/* Drawer sidebar (mobile) */}
+      <aside className={`dashboard-sidebar sidebar-drawer ${open ? "is-open" : ""}`} aria-hidden={!open}>
+        {sidebarContent}
       </aside>
 
       <div className="dashboard-main">
         <header className="dashboard-topbar">
+          {/* Hamburger — mobile only */}
+          <button
+            className="sidebar-hamburger"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+
           <div className="dashboard-breadcrumb">
             <span>RetainDB Growth Operator</span>
             <strong>·</strong>

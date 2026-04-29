@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",
+    "@retaindb/sdk": "^4.8.0",
     "hono": "^4.7.0",
     "nodemailer": "^8.0.7",
     "postgres": "^3.4.8",

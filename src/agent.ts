@@ -11,10 +11,11 @@
 
 import type { AppConfig } from "./config.js";
 import type { LanguageModelProvider, AgentMessage, ToolDefinition } from "./llm.js";
-import type { MarketingStore, MemoryProvider } from "./domain.js";
+import type { MarketingStore } from "./domain.js";
 import type { GrowthOperator } from "./growth-operator.js";
 import type { ResearchCoordinator } from "./research-connectors.js";
 import { runContentDistributionWorker, runHnCommentWorker } from "./operator-workers.js";
+import { RetainDB } from "@retaindb/sdk";
 
 const MAX_ITERATIONS = 12;
 
@@ -513,6 +514,8 @@ function buildTools(ctx: ToolContext): Array<{ definition: ToolDefinition; handl
 // ---------------------------------------------------------------------------
 
 export class AIAgent {
+  private readonly retaindb: RetainDB | null;
+
   constructor(
     private readonly options: {
       llm: LanguageModelProvider;
@@ -520,9 +523,15 @@ export class AIAgent {
       operator: GrowthOperator;
       research: ResearchCoordinator;
       config: AppConfig;
-      memoryProvider?: MemoryProvider;
     },
-  ) {}
+  ) {
+    const apiKey = options.config.retainedbApiKey;
+    const baseUrl = options.config.retainedbBaseUrl;
+    const project = options.config.retainedbProject;
+    this.retaindb = apiKey
+      ? new RetainDB({ apiKey, baseUrl, project })
+      : null;
+  }
 
   async chat(input: {
     workspaceId: string;
@@ -554,18 +563,12 @@ export class AIAgent {
     const workspaceName = workspace?.name ?? input.workspaceId;
     const workspaceIcp = workspace?.primaryIcp ?? "not set";
 
-    // Fetch relevant memories to enrich the system prompt
+    // Fetch relevant memories via RetainDB SDK
     let memoryContext = "";
-    if (this.options.memoryProvider) {
+    if (this.retaindb) {
       try {
-        const memories = await this.options.memoryProvider.search({
-          query: input.message,
-          project: input.workspaceId,
-          limit: 5,
-        });
-        if (memories.length > 0) {
-          memoryContext = "\n\nRelevant memory context:\n" + memories.map((m, i) => `${i + 1}. ${m.content}`).join("\n");
-        }
+        const { context } = await this.retaindb.user(input.workspaceId).getContext(input.message);
+        memoryContext = context;
       } catch {
         // non-fatal
       }
@@ -644,19 +647,9 @@ export class AIAgent {
       lastText = "I wasn't able to complete the request within the iteration limit. Please try a more specific command.";
     }
 
-    // Write a brief memory of this exchange so future chats have context
-    if (this.options.memoryProvider && lastText) {
-      try {
-        await this.options.memoryProvider.add({
-          project: input.workspaceId,
-          content: `Operator asked: "${input.message.slice(0, 200)}". Agent responded: "${lastText.slice(0, 300)}"`,
-          memoryType: "event",
-          importance: 0.4,
-          scope: "working",
-        });
-      } catch {
-        // non-fatal
-      }
+    // Store the user's message in memory (background — non-blocking)
+    if (this.retaindb) {
+      this.retaindb.user(input.workspaceId).remember(input.message).catch(() => {});
     }
 
     return { text: lastText, intent: "agent" };

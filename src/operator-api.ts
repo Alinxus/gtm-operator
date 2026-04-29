@@ -1145,7 +1145,6 @@ export function createOperatorApp(options: {
         operator: options.operator,
         research,
         config: options.config,
-        memoryProvider: options.memoryProvider,
       });
       const response = await agent.chat({
         workspaceId,
