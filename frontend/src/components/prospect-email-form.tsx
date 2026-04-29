@@ -14,7 +14,6 @@ export function ProspectEmailForm({ workspaceId }: ProspectEmailFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [domain, setDomain] = useState("");
   const [role, setRole] = useState("");
   const [note, setNote] = useState("");
   const [status, setStatus] = useState<"idle" | "ok" | "error">("idle");
@@ -24,15 +23,20 @@ export function ProspectEmailForm({ workspaceId }: ProspectEmailFormProps) {
     event.preventDefault();
     setStatus("idle");
     setMessage("");
+
+    // Derive company from email domain if not provided
+    const emailDomain = email.includes("@") ? email.split("@")[1] : null;
+    const companyName = company.trim() || (emailDomain ? emailDomain.split(".")[0] : "Unknown");
+
     startTransition(async () => {
       try {
         await postJson(`/v2/workspaces/${workspaceId}/signals`, {
           source: "manual",
-          title: `Prospect: ${name} at ${company}`,
-          content: note || `${role || "Founder"} at ${company}. Potential fit for RetainDB.`,
+          title: `Prospect: ${name}${companyName ? ` at ${companyName}` : ""}`,
+          content: note || `${role || "Founder"}${companyName ? ` at ${companyName}` : ""}.`,
           account: {
-            name: company,
-            ...(domain ? { domain } : {}),
+            name: companyName,
+            ...(emailDomain ? { domain: emailDomain } : {}),
           },
           person: {
             name,
@@ -46,7 +50,6 @@ export function ProspectEmailForm({ workspaceId }: ProspectEmailFormProps) {
         setName("");
         setEmail("");
         setCompany("");
-        setDomain("");
         setRole("");
         setNote("");
         router.refresh();
@@ -84,13 +87,12 @@ export function ProspectEmailForm({ workspaceId }: ProspectEmailFormProps) {
       </div>
       <div className="dashboard-form two-col">
         <label className="dashboard-field">
-          <span className="dashboard-label">Company *</span>
+          <span className="dashboard-label">Company</span>
           <input
             className="dashboard-input"
-            placeholder="Acme AI"
+            placeholder="Acme AI  (optional)"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-            required
           />
         </label>
         <label className="dashboard-field">
@@ -104,19 +106,10 @@ export function ProspectEmailForm({ workspaceId }: ProspectEmailFormProps) {
         </label>
       </div>
       <label className="dashboard-field">
-        <span className="dashboard-label">Domain</span>
-        <input
-          className="dashboard-input"
-          placeholder="acme.ai  (optional — helps find email if missing)"
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-        />
-      </label>
-      <label className="dashboard-field">
-        <span className="dashboard-label">Context / why they&apos;re relevant</span>
+        <span className="dashboard-label">Context</span>
         <textarea
           className="dashboard-textarea"
-          placeholder="e.g. Tweeted about losing LLM context across sessions. Building an AI assistant. 3-person team."
+          placeholder="e.g. Tweeted about losing LLM context. Building an AI assistant. 3-person team."
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={3}
