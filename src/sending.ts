@@ -1,7 +1,9 @@
 /**
- * Email sending via Resend
+ * Email sending via SMTP (nodemailer) or Resend fallback
  * Handles outbound sequences + delivery event webhooks
  */
+
+import nodemailer from "nodemailer";
 
 export interface SendEmailInput {
   to: string;
@@ -15,6 +17,56 @@ export interface SendEmailInput {
 export interface SendEmailResult {
   id: string;
 }
+
+// ---------------------------------------------------------------------------
+// SMTP client (Spacemail / any SMTP provider)
+// ---------------------------------------------------------------------------
+
+export class SmtpEmailClient {
+  private readonly fromHeader: string;
+  private readonly transporter: nodemailer.Transporter;
+
+  constructor(options: {
+    host: string;
+    port: number;
+    user: string;
+    pass: string;
+    fromName: string;
+    fromAddress: string;
+  }) {
+    this.fromHeader = `${options.fromName} <${options.fromAddress}>`;
+    this.transporter = nodemailer.createTransport({
+      host: options.host,
+      port: options.port,
+      secure: options.port === 465,
+      auth: { user: options.user, pass: options.pass },
+    });
+  }
+
+  async send(input: SendEmailInput): Promise<SendEmailResult> {
+    const info = await this.transporter.sendMail({
+      from: this.fromHeader,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      ...(input.html ? { html: input.html } : {}),
+      ...(input.replyTo ? { replyTo: input.replyTo } : {}),
+    });
+    return { id: info.messageId ?? info.response ?? "sent" };
+  }
+
+  async sendBatch(emails: SendEmailInput[]): Promise<SendEmailResult[]> {
+    const results: SendEmailResult[] = [];
+    for (const email of emails) {
+      results.push(await this.send(email));
+    }
+    return results;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Resend client (kept as fallback / for webhook parsing)
+// ---------------------------------------------------------------------------
 
 export class ResendEmailClient {
   constructor(
@@ -60,7 +112,6 @@ export class ResendEmailClient {
 
   async sendBatch(emails: SendEmailInput[]): Promise<SendEmailResult[]> {
     if (emails.length === 0) return [];
-    // Resend batch endpoint accepts up to 100 per call
     const chunks = chunk(emails, 100);
     const results: SendEmailResult[] = [];
     for (const batch of chunks) {

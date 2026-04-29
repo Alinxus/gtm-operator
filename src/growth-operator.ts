@@ -2077,9 +2077,17 @@ export class GrowthOperator extends GtmOperator {
 
   async sendApprovedEmailTouch(input: {
     touchId: string;
-    resendApiKey: string;
-    resendFromAddress: string;
-    resendFromName: string;
+    // SMTP (primary)
+    smtpHost?: string;
+    smtpPort?: number;
+    smtpUser?: string;
+    smtpPass?: string;
+    smtpFromAddress?: string;
+    smtpFromName?: string;
+    // Resend (fallback)
+    resendApiKey?: string;
+    resendFromAddress?: string;
+    resendFromName?: string;
     githubToken?: string;
     hunterApiKey?: string;
   }): Promise<{ sent: boolean; reason: string; messageId?: string }> {
@@ -2139,12 +2147,29 @@ export class GrowthOperator extends GtmOperator {
       return { sent: false, reason: "no_email_found" };
     }
 
-    const { ResendEmailClient, markdownToEmailHtml } = await import("./sending.js");
-    const client = new ResendEmailClient({
-      apiKey: input.resendApiKey,
-      fromAddress: input.resendFromAddress,
-      fromName: input.resendFromName,
-    });
+    const { SmtpEmailClient, ResendEmailClient, markdownToEmailHtml } = await import("./sending.js");
+
+    const useSmtp = !!(input.smtpHost && input.smtpUser && input.smtpPass && input.smtpFromAddress);
+    const useResend = !!(input.resendApiKey && input.resendFromAddress);
+
+    if (!useSmtp && !useResend) {
+      return { sent: false, reason: "no_email_transport_configured" };
+    }
+
+    const client = useSmtp
+      ? new SmtpEmailClient({
+          host: input.smtpHost!,
+          port: input.smtpPort ?? 465,
+          user: input.smtpUser!,
+          pass: input.smtpPass!,
+          fromAddress: input.smtpFromAddress!,
+          fromName: input.smtpFromName ?? "Founder",
+        })
+      : new ResendEmailClient({
+          apiKey: input.resendApiKey!,
+          fromAddress: input.resendFromAddress!,
+          fromName: input.resendFromName ?? "Founder",
+        });
 
     const subject = touch.title || "Following up";
     const text = touch.body;
@@ -2167,7 +2192,7 @@ export class GrowthOperator extends GtmOperator {
       metadata: {
         ...touch.metadata,
         sentAt: new Date().toISOString(),
-        resendMessageId: result.id,
+        messageId: result.id,
         recipientEmail,
         recipientName,
       },

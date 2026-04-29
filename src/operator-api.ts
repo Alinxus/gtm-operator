@@ -920,14 +920,22 @@ export function createOperatorApp(options: {
     }
   });
 
-  // Send an approved email touch via Resend
+  // Send an approved email touch via SMTP or Resend
   app.post("/v2/touches/:touchId/send-email", async (c) => {
-    if (!options.config.resendApiKey || !options.config.resendFromAddress) {
-      return jsonError("Resend not configured. Set RESEND_API_KEY and RESEND_FROM_ADDRESS.", 503);
+    const hasSmtp = !!(options.config.smtpHost && options.config.smtpUser && options.config.smtpPass && options.config.smtpFromAddress);
+    const hasResend = !!(options.config.resendApiKey && options.config.resendFromAddress);
+    if (!hasSmtp && !hasResend) {
+      return jsonError("No email transport configured. Set SMTP_HOST/SMTP_USER/SMTP_PASS/SMTP_FROM_ADDRESS or RESEND_API_KEY/RESEND_FROM_ADDRESS.", 503);
     }
     try {
       const result = await options.operator.sendApprovedEmailTouch({
         touchId: c.req.param("touchId"),
+        smtpHost: options.config.smtpHost,
+        smtpPort: options.config.smtpPort,
+        smtpUser: options.config.smtpUser,
+        smtpPass: options.config.smtpPass,
+        smtpFromAddress: options.config.smtpFromAddress,
+        smtpFromName: options.config.smtpFromName,
         resendApiKey: options.config.resendApiKey,
         resendFromAddress: options.config.resendFromAddress,
         resendFromName: options.config.resendFromName,

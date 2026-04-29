@@ -39,7 +39,14 @@ const EnvSchema = z.object({
   ALLOW_MOCK_MEMORY_PROVIDER: z.coerce.boolean().default(false),
   // Email finding
   HUNTER_API_KEY: z.string().trim().optional(),
-  // Email sending (Resend)
+  // Email sending — SMTP (primary, e.g. Spacemail)
+  SMTP_HOST: z.string().trim().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_USER: z.string().trim().optional(),
+  SMTP_PASS: z.string().trim().optional(),
+  SMTP_FROM_ADDRESS: z.string().trim().optional(),
+  SMTP_FROM_NAME: z.string().trim().min(1).default("Founder"),
+  // Email sending — Resend (fallback / webhook events)
   RESEND_API_KEY: z.string().trim().optional(),
   RESEND_FROM_ADDRESS: z.string().trim().optional(),
   RESEND_FROM_NAME: z.string().trim().min(1).default("Founder"),
@@ -98,7 +105,14 @@ export interface AppConfig {
   allowMockMemoryProvider: boolean;
   // Email finding
   hunterApiKey?: string;
-  // Email sending
+  // Email sending — SMTP
+  smtpHost?: string;
+  smtpPort: number;
+  smtpUser?: string;
+  smtpPass?: string;
+  smtpFromAddress?: string;
+  smtpFromName: string;
+  // Email sending — Resend fallback
   resendApiKey?: string;
   resendFromAddress?: string;
   resendFromName: string;
@@ -174,6 +188,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   }
 
   const hunterApiKey = parsed.HUNTER_API_KEY?.trim();
+  const smtpHost = parsed.SMTP_HOST?.trim();
+  const smtpUser = parsed.SMTP_USER?.trim();
+  const smtpPass = parsed.SMTP_PASS?.trim();
+  const smtpFromAddress = parsed.SMTP_FROM_ADDRESS?.trim();
   const resendApiKey = parsed.RESEND_API_KEY?.trim();
   const resendFromAddress = parsed.RESEND_FROM_ADDRESS?.trim();
   const xAccessToken = parsed.X_ACCESS_TOKEN?.trim();
@@ -223,6 +241,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     allowInMemoryStore: parsed.ALLOW_IN_MEMORY_STORE,
     allowMockMemoryProvider: parsed.ALLOW_MOCK_MEMORY_PROVIDER,
     hunterApiKey,
+    smtpHost,
+    smtpPort: parsed.SMTP_PORT,
+    smtpUser,
+    smtpPass,
+    smtpFromAddress,
+    smtpFromName: parsed.SMTP_FROM_NAME,
     resendApiKey,
     resendFromAddress,
     resendFromName: parsed.RESEND_FROM_NAME,

@@ -52,11 +52,14 @@ export default {
   async fetch(request: Request, env: WorkerEnv, executionContext: WorkerExecutionContext) {
     const config = workerEnvToConfig(env);
     const key = cacheKey(config);
+    const shouldSeed = !seededRuntimeKeys.has(key);
+    // Mark as seeded before attempting so a transient seed failure doesn't
+    // cause every subsequent request in this isolate to retry and re-throw.
+    seededRuntimeKeys.add(key);
     const runtime = await createRuntime(config, {
       ensureSchema: false,
-      seedOnBoot: !seededRuntimeKeys.has(key),
+      seedOnBoot: shouldSeed,
     });
-    seededRuntimeKeys.add(key);
     return runtime.app.fetch(request, env, executionContext as never);
   },
 

@@ -7,6 +7,7 @@ import {
   BellRing,
   BriefcaseBusiness,
   CalendarDays,
+  Mail,
   Megaphone,
   MessageSquare,
   Rocket,
@@ -20,6 +21,7 @@ import { formatNumber } from "@/lib/utils";
 const navigation = [
   { name: "Chat", href: "chat", icon: MessageSquare, description: "Natural language operator" },
   { name: "Today", href: "today", icon: Activity, description: "P0 always-on queue" },
+  { name: "Outreach", href: "outreach", icon: Mail, description: "Cold email queue" },
   { name: "Accounts", href: "accounts", icon: UsersRound, description: "Every account remembered" },
   { name: "Approvals", href: "approvals", icon: BellRing, description: "Approval before send" },
   { name: "Social", href: "social", icon: Megaphone, description: "Brand presence lane" },
