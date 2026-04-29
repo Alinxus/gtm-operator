@@ -22,6 +22,7 @@ const brandCreateSchema = z.object({
   slug: z.string().min(1),
   name: z.string().min(1),
   description: z.string().optional(),
+  icp: z.string().optional(),
   memoryProvider: z.enum(["retaindb-http", "mock"]).optional(),
   memoryProject: z.string().optional(),
   voice: brandVoiceSchema.optional(),
@@ -219,7 +220,10 @@ export function createApp(options: {
         memoryProject: body.memoryProject ?? `${body.slug}-marketing`,
         voice,
       });
-      const workspace = await operator.ensureDefaultWorkspace(brand);
+      const workspace = await operator.ensureDefaultWorkspace(brand, {
+        icp: body.icp,
+        description: body.description,
+      });
 
       return c.json({ brand, workspace }, 201);
     } catch (error) {

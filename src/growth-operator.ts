@@ -297,8 +297,8 @@ export class GrowthOperator extends GtmOperator {
     return this.growthOptions.llmProvider ?? null;
   }
 
-  override async ensureDefaultWorkspace(brand: Brand) {
-    const workspace = await super.ensureDefaultWorkspace(brand);
+  override async ensureDefaultWorkspace(brand: Brand, opts?: { icp?: string; description?: string }) {
+    const workspace = await super.ensureDefaultWorkspace(brand, opts);
     await this.ensureDefaultPublishDestinationsForWorkspace(workspace, brand);
     return workspace;
   }
@@ -2206,6 +2206,57 @@ export class GrowthOperator extends GtmOperator {
     await this.scheduleSequenceFollowUps(touch.sequenceId);
 
     return { sent: true, reason: "ok", messageId: result.id };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Direct email send (bypasses touch/prospect pipeline)
+  // ---------------------------------------------------------------------------
+
+  async sendDirectEmail(input: {
+    to: string;
+    subject: string;
+    body: string;
+    smtpHost?: string;
+    smtpPort?: number;
+    smtpUser?: string;
+    smtpPass?: string;
+    smtpFromAddress?: string;
+    smtpFromName?: string;
+    resendApiKey?: string;
+    resendFromAddress?: string;
+    resendFromName?: string;
+  }): Promise<{ sent: boolean; reason: string; messageId?: string }> {
+    const { SmtpEmailClient, ResendEmailClient, markdownToEmailHtml } = await import("./sending.js");
+
+    const useSmtp = !!(input.smtpHost && input.smtpUser && input.smtpPass && input.smtpFromAddress);
+    const useResend = !!(input.resendApiKey && input.resendFromAddress);
+
+    if (!useSmtp && !useResend) {
+      return { sent: false, reason: "no_email_transport_configured" };
+    }
+
+    const client = useSmtp
+      ? new SmtpEmailClient({
+          host: input.smtpHost!,
+          port: input.smtpPort ?? 465,
+          user: input.smtpUser!,
+          pass: input.smtpPass!,
+          fromAddress: input.smtpFromAddress!,
+          fromName: input.smtpFromName ?? "Founder",
+        })
+      : new ResendEmailClient({
+          apiKey: input.resendApiKey!,
+          fromAddress: input.resendFromAddress!,
+          fromName: input.resendFromName ?? "Founder",
+        });
+
+    const html = markdownToEmailHtml(input.body);
+    try {
+      const result = await client.send({ to: input.to, subject: input.subject, text: input.body, html });
+      return { sent: true, reason: "ok", messageId: result.id };
+    } catch (err) {
+      return { sent: false, reason: (err as Error).message };
+    }
   }
 
   // ---------------------------------------------------------------------------

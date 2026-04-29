@@ -260,17 +260,19 @@ export class GtmOperator {
     },
   ) {}
 
-  async ensureDefaultWorkspace(brand: Brand) {
+  async ensureDefaultWorkspace(brand: Brand, opts?: { icp?: string; description?: string }) {
     const existing = await this.options.store.findWorkspaceBySlug(brand.id, `${brand.slug}-gtm`);
     if (existing) return existing;
+
+    const primaryIcp = opts?.icp ?? "AI app founders and small technical teams shipping AI features now.";
 
     const workspace = await this.options.store.createWorkspace({
       id: createId("workspace"),
       brandId: brand.id,
       slug: `${brand.slug}-gtm`,
       name: `${brand.name} GTM`,
-      description: "Signals in. Best next action out.",
-      primaryIcp: "AI app founders and small technical teams shipping AI features now.",
+      description: opts?.description ?? "Signals in. Best next action out.",
+      primaryIcp,
       metadata: { seeded: true },
     });
 
@@ -278,11 +280,11 @@ export class GtmOperator {
       id: createId("icp"),
       workspaceId: workspace.id,
       brandId: brand.id,
-      name: "AI app founders",
-      description: "Founders and small teams shipping AI products that need memory, grounded docs, and repeatable context.",
-      pains: ["context loss", "memory gaps", "hallucinated answers", "rebuild pressure"],
-      triggers: ["looking for memory", "complaining about context", "evaluating agent infra", "integration pain"],
-      disqualifiers: ["non-AI teams", "paid ads only", "purely consumer social growth"],
+      name: primaryIcp.slice(0, 60),
+      description: primaryIcp,
+      pains: [],
+      triggers: [],
+      disqualifiers: [],
       channels: ["outbound", "reply", "social", "community", "landing"],
       metadata: { seeded: true },
     });
@@ -1300,7 +1302,14 @@ export class GtmOperator {
     }
     const people = await this.options.store.listProspectPeopleByAccount(account.id);
     const existing = people.find((person) => (personInput.email && person.email === personInput.email) || person.name === personInput.name);
-    if (existing) return existing;
+    if (existing) {
+      // Update email if the existing record has none but we now have it
+      if (!existing.email && personInput.email) {
+        await this.options.store.updateProspectPerson(existing.id, { email: personInput.email });
+        return { ...existing, email: personInput.email };
+      }
+      return existing;
+    }
 
     return this.options.store.createProspectPerson({
       id: personInput.id ?? createId("person"),

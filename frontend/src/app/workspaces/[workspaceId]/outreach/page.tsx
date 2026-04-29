@@ -12,15 +12,15 @@ export default async function OutreachPage({
   const { workspaceId } = await params;
   const approvals = await operatorApi.listApprovals(workspaceId);
 
-  // Email touches only — pending approval or already approved
+  // Email touches only — pending review or already approved
   const emailQueue = approvals.filter(
     ({ touch }) =>
       touch.channel === "outbound" &&
       (touch.touchType === "email" || touch.touchType === "follow_up") &&
-      (touch.status === "pending_approval" || touch.status === "approved"),
+      (touch.status === "review_required" || touch.status === "needs_revision" || touch.status === "approved"),
   );
 
-  const pendingCount = emailQueue.filter(({ touch }) => touch.status === "pending_approval").length;
+  const pendingCount = emailQueue.filter(({ touch }) => touch.status === "review_required" || touch.status === "needs_revision").length;
   const approvedCount = emailQueue.filter(({ touch }) => touch.status === "approved").length;
 
   return (
@@ -98,7 +98,7 @@ export default async function OutreachPage({
                           {person?.email ? ` · ${person.email}` : ""}
                         </p>
                       </div>
-                      <span className="dashboard-pill">{touch.status.replace("_", " ")}</span>
+                      <span className="dashboard-pill">{touch.status === "review_required" ? "pending review" : touch.status.replace(/_/g, " ")}</span>
                     </div>
 
                     <div className="dashboard-panel-body dashboard-stack" style={{ gap: 8 }}>

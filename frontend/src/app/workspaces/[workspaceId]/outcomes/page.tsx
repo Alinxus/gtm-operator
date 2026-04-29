@@ -19,10 +19,9 @@ export default async function OutcomesPage({
   return (
     <div className="dashboard-page">
       <header className="dashboard-page-head">
-        <p className="dashboard-page-eyebrow">Learning loop · outcomes and attribution</p>
         <h1 className="dashboard-page-title">Outcomes</h1>
         <p className="dashboard-page-subtitle">
-          Track signal → touched → replied → booked → qualified → paid and write back what actually converts.
+          Track how prospects move from first contact to paying customer.
         </p>
       </header>
 
@@ -45,7 +44,7 @@ export default async function OutcomesPage({
         <article className="dashboard-stat">
           <p className="dashboard-stat-label">Attributions</p>
           <p className="dashboard-stat-value">{formatNumber(dashboard.outcomes.attributions.length)}</p>
-          <p className="dashboard-stat-meta">channel weight records</p>
+          <p className="dashboard-stat-meta">what moved the needle</p>
         </article>
       </section>
 
@@ -53,8 +52,8 @@ export default async function OutcomesPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Pipeline stages</p>
-              <p className="dashboard-panel-subtitle">stage progression volume</p>
+              <p className="dashboard-panel-title">Pipeline</p>
+              <p className="dashboard-panel-subtitle">How many prospects are at each stage</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -84,8 +83,8 @@ export default async function OutcomesPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Active goals</p>
-              <p className="dashboard-panel-subtitle">booked conversations and paid users</p>
+              <p className="dashboard-panel-title">Goals</p>
+              <p className="dashboard-panel-subtitle">Your targets for bookings and customers</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -112,7 +111,7 @@ export default async function OutcomesPage({
           <div className="dashboard-panel-head">
             <div>
               <p className="dashboard-panel-title">Conversations</p>
-              <p className="dashboard-panel-subtitle">latest stage and summary</p>
+              <p className="dashboard-panel-subtitle">Active and past customer conversations</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -148,8 +147,8 @@ export default async function OutcomesPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Attribution notes</p>
-              <p className="dashboard-panel-subtitle">what moved conversations forward</p>
+              <p className="dashboard-panel-title">What worked</p>
+              <p className="dashboard-panel-subtitle">Which channels and actions moved prospects forward</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -162,7 +161,7 @@ export default async function OutcomesPage({
                     <div className="dashboard-inline">
                       <span className="dashboard-pill">{attribution.stage}</span>
                       <span className="dashboard-mono">{attribution.channel || "n/a"}</span>
-                      <span className="dashboard-mono">weight {attribution.weight}</span>
+                      <span className="dashboard-mono">{attribution.weight} weight</span>
                     </div>
                     <p className="dashboard-subtle">{attribution.notes}</p>
                   </div>

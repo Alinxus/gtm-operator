@@ -22,9 +22,8 @@ export default async function TodayPage({
   return (
     <div className="dashboard-page">
       <header className="dashboard-page-head">
-        <p className="dashboard-page-eyebrow">Lane A · outbound / direct distribution</p>
         <h1 className="dashboard-page-title">Today</h1>
-        <p className="dashboard-page-subtitle">Who matters now, why they matter, and what to do next.</p>
+        <p className="dashboard-page-subtitle">Your top prospects ranked by priority — who to reach out to and why.</p>
       </header>
 
       <section className="dashboard-stats">
@@ -54,8 +53,8 @@ export default async function TodayPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Priority queue</p>
-              <p className="dashboard-panel-subtitle">score-ranked by pain fit, signal strength, and reachability</p>
+              <p className="dashboard-panel-title">Top prospects</p>
+              <p className="dashboard-panel-subtitle">Ranked by how well they match your ICP</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -70,10 +69,10 @@ export default async function TodayPage({
                   <thead>
                     <tr>
                       <th>Account</th>
-                      <th>Pain</th>
+                      <th>Pain signal</th>
                       <th>Score</th>
                       <th>Why now</th>
-                      <th>Next action</th>
+                      <th>Next step</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -103,8 +102,8 @@ export default async function TodayPage({
           <article className="dashboard-panel">
             <div className="dashboard-panel-head">
               <div>
-                <p className="dashboard-panel-title">Run outbound lane</p>
-                <p className="dashboard-panel-subtitle">p0 always-on pipeline execution</p>
+                <p className="dashboard-panel-title">Generate outreach</p>
+                <p className="dashboard-panel-subtitle">Scan top prospects and create email sequences</p>
               </div>
             </div>
             <div className="dashboard-panel-body">
@@ -115,8 +114,8 @@ export default async function TodayPage({
           <article className="dashboard-panel">
             <div className="dashboard-panel-head">
               <div>
-                <p className="dashboard-panel-title">Latest outbound runs</p>
-                <p className="dashboard-panel-subtitle">execution history</p>
+                <p className="dashboard-panel-title">Recent activity</p>
+                <p className="dashboard-panel-subtitle">Last outreach runs</p>
               </div>
             </div>
             <div className="dashboard-panel-body">
@@ -142,8 +141,8 @@ export default async function TodayPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Signal in</p>
-              <p className="dashboard-panel-subtitle">capture a real pain moment and auto-generate outreach path</p>
+              <p className="dashboard-panel-title">Add a signal</p>
+              <p className="dashboard-panel-subtitle">Paste something you noticed about a prospect and let the AI generate their outreach</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -155,7 +154,7 @@ export default async function TodayPage({
           <div className="dashboard-panel-head">
             <div>
               <p className="dashboard-panel-title">All opportunities</p>
-              <p className="dashboard-panel-subtitle">full workspace backlog</p>
+              <p className="dashboard-panel-subtitle">Your full prospect backlog</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -169,7 +168,7 @@ export default async function TodayPage({
                       <th>Stage</th>
                       <th>Score</th>
                       <th>Reason</th>
-                      <th>Playbook</th>
+                      <th>Approach</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -948,6 +948,34 @@ export function createOperatorApp(options: {
     }
   });
 
+  // Direct email send — bypasses touch/prospect pipeline
+  app.post("/v2/workspaces/:workspaceId/email/send", async (c) => {
+    try {
+      const body = await parseBody(c.req.raw, z.object({
+        to: z.string().email(),
+        subject: z.string().min(1),
+        body: z.string().min(1),
+      }));
+      const result = await options.operator.sendDirectEmail({
+        to: body.to,
+        subject: body.subject,
+        body: body.body,
+        smtpHost: options.config.smtpHost,
+        smtpPort: options.config.smtpPort,
+        smtpUser: options.config.smtpUser,
+        smtpPass: options.config.smtpPass,
+        smtpFromAddress: options.config.smtpFromAddress,
+        smtpFromName: options.config.smtpFromName,
+        resendApiKey: options.config.resendApiKey,
+        resendFromAddress: options.config.resendFromAddress,
+        resendFromName: options.config.resendFromName,
+      });
+      return c.json(result, result.sent ? 200 : 422);
+    } catch (error) {
+      return jsonError((error as Error).message, 400);
+    }
+  });
+
   // Generate distribution content (X thread, Reddit post, newsletter pitch)
   app.post("/v2/workspaces/:workspaceId/content/generate", async (c) => {
     try {
@@ -1117,6 +1145,7 @@ export function createOperatorApp(options: {
         operator: options.operator,
         research,
         config: options.config,
+        memoryProvider: options.memoryProvider,
       });
       const response = await agent.chat({
         workspaceId,

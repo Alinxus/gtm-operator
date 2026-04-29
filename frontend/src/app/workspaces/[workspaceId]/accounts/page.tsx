@@ -24,9 +24,8 @@ export default async function AccountsPage({
   return (
     <div className="dashboard-page">
       <header className="dashboard-page-head">
-        <p className="dashboard-page-eyebrow">Shared brain · workspace memory</p>
         <h1 className="dashboard-page-title">Accounts</h1>
-        <p className="dashboard-page-subtitle">Every account remembered with fit, pain, stage, and reachable channels.</p>
+        <p className="dashboard-page-subtitle">Every company and contact you've tracked, with their stage and best pain signal.</p>
       </header>
 
       <section className="dashboard-stats">
@@ -56,8 +55,8 @@ export default async function AccountsPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Account map</p>
-              <p className="dashboard-panel-subtitle">fit, stage, channels, and strongest pain signal</p>
+              <p className="dashboard-panel-title">Companies</p>
+              <p className="dashboard-panel-subtitle">Stage, fit score, and top pain signal for each account</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -74,9 +73,9 @@ export default async function AccountsPage({
                       <th>Account</th>
                       <th>Stage</th>
                       <th>Fit</th>
-                      <th>People</th>
+                      <th>Contacts</th>
                       <th>Channels</th>
-                      <th>Strongest pain</th>
+                      <th>Top pain</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -113,8 +112,8 @@ export default async function AccountsPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">Account enrichment run</p>
-              <p className="dashboard-panel-subtitle">rerank + refresh account intelligence</p>
+              <p className="dashboard-panel-title">Refresh accounts</p>
+              <p className="dashboard-panel-subtitle">Re-score and update all accounts</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -127,8 +126,8 @@ export default async function AccountsPage({
         <article className="dashboard-panel">
           <div className="dashboard-panel-head">
             <div>
-              <p className="dashboard-panel-title">People index</p>
-              <p className="dashboard-panel-subtitle">persona-fit and role context</p>
+              <p className="dashboard-panel-title">Contacts</p>
+              <p className="dashboard-panel-subtitle">Everyone you've met at these companies</p>
             </div>
           </div>
           <div className="dashboard-panel-body">
@@ -142,7 +141,7 @@ export default async function AccountsPage({
                       <th>Name</th>
                       <th>Role</th>
                       <th>Account</th>
-                      <th>Persona fit</th>
+                      <th>Fit</th>
                       <th>Email</th>
                       <th>Handle</th>
                     </tr>
